@@ -1,0 +1,11 @@
+{
+  "name": "Cribbage",
+  "short_name": "Cribbage",
+  "description": "Cribbage against the computer or a friend.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b3d22",
+  "theme_color": "#0b3d22",
+  "icons": [{ "src": "img/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }]
+}
