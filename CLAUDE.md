@@ -34,7 +34,8 @@ computer, or a friend anywhere with a 4-letter code. Sister project: `~/code/hea
   `crib.local` (the computer game, every move), `crib.online` (last code). Names from the
   other browser always go through `esc()`. The table redraws inside `.screen`; dialogs
   opened on top (menu, settings) are left alone so they don't flicker.
-- Not ported (yet): the Hawaiian / Fish / Poop themes, nearby (Bluetooth) play, iCloud stats.
+- Not ported: nearby (Bluetooth) play, iCloud stats. The Hawaiian / Fish / Poop themes are
+  left out on purpose (Louie, 2026-10-23: not needed on the web) — classic board only.
 
 ## Test
 - Rules: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc -m tests/engine.test.js`
