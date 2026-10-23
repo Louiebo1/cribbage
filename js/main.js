@@ -122,6 +122,8 @@ const ui = {
   hint: null,            // "That would take the count past 31…"
   typed: '',             // The count being typed in the show.
   announcement: null,    // { event, until }: a pegging score floating over the table.
+  announcementShown: null, // The event last drawn: it pops in only the first time.
+  goShown: new Set(),    // Gos already drawn this hand: they pop in only once.
   lingering: null,       // { plays, until }: a finished run left up for a moment.
   holdShowUntil: 0,      // Pegging just ended: the show waits so the last points can be read.
   guess: null,           // Online guest: my move shown before the host confirms it.
@@ -134,6 +136,7 @@ const later = [];        // Timers that redraw when something on the table expir
 
 function resetUI() {
   ui.selected.clear(); ui.hint = null; ui.typed = ''; ui.announcement = null; ui.lingering = null;
+  ui.announcementShown = null; ui.goShown.clear();
   ui.holdShowUntil = 0; ui.guess = null; ui.prev = null; ui.recorded = false; ui.animatedPlays = 0; ui.board = null; ui.overlayKey = null;
   later.splice(0).forEach(clearTimeout);
 }
@@ -370,7 +373,8 @@ function update() {
   const g = shown(), old = ui.prev, now = Date.now();
   const newGame = !old || g.eventCounter < old.eventCounter || (old.phase === 'gameOver' && g.phase !== 'gameOver');
   const sameHand = old && !newGame && old.handNumber === g.handNumber;
-  if (!sameHand) { ui.selected.clear(); ui.typed = ''; }
+  if (!sameHand) { ui.selected.clear(); ui.typed = ''; ui.goShown.clear(); }
+  if (newGame) ui.announcementShown = null;
   if (old && !sameHand && g.handNumber !== old.handNumber) ui.hint = null;
 
   if (sameHand && g.plays.length === old.plays.length + 1) {
@@ -469,7 +473,7 @@ function render() {
   const fan = el('div', 'fan-backs');
   g.hands[opp].forEach((_, i) => { const b = backEl(); b.style.left = `calc(var(--table-w) * 0.75 * 0.32 * ${i})`; fan.appendChild(b); });
   them.appendChild(fan);
-  if (g.saidGo.includes(opp)) them.appendChild(el('div', 'go', 'Go'));
+  if (g.saidGo.includes(opp)) them.appendChild(goEl(g, opp));
   them.appendChild(el('div', 'spacer'));
   if ((g.phase === 'pegging' && g.turn === opp) || (g.phase === 'discarding' && !G.hasDiscarded(g, opp))) {
     them.appendChild(el('div', 'dots', '<i></i><i></i><i></i>'));
@@ -563,9 +567,19 @@ function peggingPile(g, now) {
   return pile;
 }
 
+// A go for this run of the count: it pops in once, not on every redraw.
+function goEl(g, seat) {
+  const key = `${g.handNumber}:${g.plays.length - g.pile.length}:${seat}`;
+  const go = el('div', 'go' + (ui.goShown.has(key) ? '' : ' fresh'), 'Go');
+  ui.goShown.add(key);
+  return go;
+}
+
 function announcementEl(event) {
   const why = explanation(event);
-  const a = el('div', 'announcement ' + (event.player === ui.me ? 'mine' : 'theirs'));
+  // Pops in the first time it's drawn only; later redraws leave it still.
+  const a = el('div', 'announcement ' + (event.player === ui.me ? 'mine' : 'theirs') + (ui.announcementShown === event.id ? '' : ' fresh'));
+  ui.announcementShown = event.id;
   a.innerHTML = `<b>${event.items.map(itemLabel).join(' + ')} for ${G.eventPoints(event)}</b><small>${nameOf(event.player)}</small>${why ? `<span>${why}</span>` : ''}`;
   return a;
 }
@@ -589,7 +603,7 @@ function statusArea(g) {
   const area = el('div', 'status');
   const row = el('div', 'row');
   const discarding = g.phase === 'discarding' && !G.hasDiscarded(g, ui.me);
-  if (g.saidGo.includes(ui.me)) row.appendChild(el('div', 'go', 'Go'));
+  if (g.saidGo.includes(ui.me)) row.appendChild(goEl(g, ui.me));
   row.appendChild(el('div', 'text', statusText(g)));
   if (discarding && settings.hints) row.appendChild(button('Suggest', 'ghost', suggest));
   if (discarding) {

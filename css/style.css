@@ -46,7 +46,8 @@ input:focus { outline: 2px solid var(--gold); }
 .dots i:nth-child(2) { animation-delay: 0.2s; }
 .dots i:nth-child(3) { animation-delay: 0.4s; }
 @keyframes think { 0%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
-.go { background: var(--accent); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: 14px; animation: pop 0.25s ease-out; }
+.go { background: var(--accent); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: 14px; }
+.go.fresh { animation: pop 0.25s ease-out; }
 @keyframes pop { from { transform: scale(0.6); opacity: 0; } }
 
 /* Start screen */
@@ -147,7 +148,8 @@ input:focus { outline: 2px solid var(--gold); }
 @keyframes from-below { from { translate: 0 120px; opacity: 0; } }
 @keyframes from-above { from { translate: 0 -120px; opacity: 0; } }
 .count { background: rgba(0, 0, 0, 0.3); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.announcement { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 5; text-align: center; padding: 8px 18px; border-radius: 20px; box-shadow: 0 3px 8px #0007; display: flex; flex-direction: column; gap: 2px; animation: pop 0.3s ease-out; max-width: 92%; }
+.announcement { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 5; text-align: center; padding: 8px 18px; border-radius: 20px; box-shadow: 0 3px 8px #0007; display: flex; flex-direction: column; gap: 2px; max-width: 92%; }
+.announcement.fresh { animation: pop 0.3s ease-out; }
 .announcement.mine { background: var(--mine); }
 .announcement.theirs { background: var(--theirs); }
 .announcement b { font-size: 19px; }
