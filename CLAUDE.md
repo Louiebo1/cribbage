@@ -51,8 +51,8 @@ computer, or a friend anywhere with a 4-letter code. Sister project: `~/code/hea
   through, load the page in a same-origin iframe from a scratch driver page. Online: two
   simulators' Safari (iPhone `?newgame=TZxx`, iPad `?g=TZxx`). Delete TZ* test games
   after (`DELETE /tables/crib-TZxx.json?auth=…`, token from anonymous `accounts:signUp`).
-  Verified 2026-10-23: 163 fast games through the page with no errors; online game to a
-  match win, drop → pause → rejoin.
+  Verified 2026-10-23: 163 fast games through the page with no errors; online game
+  (iPhone + iPad simulators) through two games, drop → pause → rejoin.
 
 ## Deploy
 GitHub Pages from `main` (repo Louiebo1/cribbage, public) → https://louiebo1.github.io/cribbage/.
