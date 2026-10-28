@@ -8,6 +8,7 @@ import { itemLabel, total } from './scoring.js';
 import { advice } from './computer.js';
 import { newTableState, LocalHost, applyMove, PACE } from './table.js';
 import { OnlineTable, onlineAvailable } from './online.js';
+import { syncGame, pushName, pushStats, accountPanel, accountLobby, statsNote, account } from './account.js';
 import { Board, MY_COLOR, THEIR_COLOR } from './board.js';
 import { play as playSound, unlockSound, sound } from './sounds.js';
 
@@ -29,6 +30,7 @@ const settings = Object.assign({ name: '', back: 'red', highFirst: true, largePr
   stored('crib.settings', {}));
 function saveSettings() {
   store('crib.settings', settings);
+  pushName(settings.name);
   document.body.classList.toggle('large-print', settings.largePrint);
   sound.on = settings.sounds;
 }
@@ -178,6 +180,7 @@ function showLobby() {
   name.appendChild(button(settings.name || 'You', 'link', () => askName(showLobby)));
   lobby.appendChild(name);
   lobby.appendChild(el('div', 'note', recordText()));
+  lobby.appendChild(accountLobby());          // Sign in with Google (or who's signed in).
 
   const code = onlineAvailable() && lastOnline.get();
   if (code) lobby.appendChild(button(`Back to Game ${code}`, 'big-button primary', () => joinGame(code)));
@@ -410,6 +413,7 @@ function update() {
       kind[won ? 'won' : 'lost'] += 1;
       if (won && G.isSkunk(g)) kind.skunks += 1;
       store('crib.stats', stats);
+      pushStats();
     }
     if (won) playSound('fanfare', 300);
     if (G.matchWinner(g) === ui.me) playSound('fanfare', 1900);
@@ -793,6 +797,7 @@ function showSettings(after) {
     saveSettings();
     after?.();
   };
+  if (!state) form.appendChild(accountPanel(button));     // Not at a table: it could change who holds the seat.
   popup('Settings', form, [['Done', 'primary', done]], done);     // Closing any way keeps the changes.
 }
 
@@ -801,7 +806,7 @@ const countingNote = () => 'Automatic: the game counts every hand. You Count: yo
 
 function showStats() {
   const row = (title, s) => `<tr><td>${title}</td><td>${s.won}</td><td>${s.lost}</td><td>${s.skunks}</td></tr>`;
-  const body = el('div', '', `<table class="stats"><tr><th></th><th>Won</th><th>Lost</th><th>Skunks</th></tr>${row('vs the Computer', stats.computer)}${row('vs Friends', stats.online)}</table><div class="note">Kept on this device.</div>`);
+  const body = el('div', '', `<table class="stats"><tr><th></th><th>Won</th><th>Lost</th><th>Skunks</th></tr>${row('vs the Computer', stats.computer)}${row('vs Friends', stats.online)}</table><div class="note">${statsNote()}</div>`);
   popup('Statistics', body, [['Done', 'primary']]);
 }
 
@@ -810,6 +815,17 @@ function showStats() {
 let resizeFrame = 0;
 window.addEventListener('resize', () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(render); });
 
+// Signed in with Google (any of the family games): the name and statistics follow the account.
+syncGame({
+  id: 'cribbage',
+  name: () => settings.name,
+  setName: (n) => {
+    settings.name = n; saveSettings();
+    for (const b of document.querySelectorAll('.lobby .name button')) b.textContent = n;
+  },
+  stats: () => stats,
+  setStats: (s) => { for (const kind of ['computer', 'online']) stats[kind] = Object.assign({ won: 0, lost: 0, skunks: 0 }, s[kind]); store('crib.stats', stats); },
+});
 if (params.get('name')) { settings.name = params.get('name').slice(0, 16); saveSettings(); }
 if (G.COUNTING.includes(params.get('counting'))) { settings.counting = params.get('counting'); saveSettings(); }
 if (params.has('fast')) Object.assign(PACE, { discard: 30, play: 40, claim: 40, runLinger: 60 });
